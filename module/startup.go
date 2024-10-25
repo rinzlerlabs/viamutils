@@ -15,7 +15,7 @@ type Component struct {
 
 var components = make([]Component, 0)
 
-func RegisterModularComponent(api resource.API, model resource.Model) error {
+func AddModularResource(api resource.API, model resource.Model) error {
 	components = append(components, Component{
 		API:   api,
 		Model: model,
@@ -23,7 +23,7 @@ func RegisterModularComponent(api resource.API, model resource.Model) error {
 	return nil
 }
 
-func StartModule(ctx context.Context, args []string, logger logging.Logger) error {
+func RunModule(ctx context.Context, args []string, logger logging.Logger) error {
 	module, err := module.NewModuleFromArgs(ctx, logger)
 	if err != nil {
 		logger.Errorf("Failed to start module: %v", err)
