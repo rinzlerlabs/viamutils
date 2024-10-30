@@ -55,6 +55,14 @@ func getEtcViamJson() (*viamJson, error) {
 	return viamJson, nil
 }
 
+func GetMachineFqdn() (string, error) {
+	config, err := GetMachineConfig()
+	if err != nil {
+		return "", err
+	}
+	return config.Cloud.FQDN, nil
+}
+
 func GetMachineId() (string, error) {
 	config, err := GetMachineConfig()
 	if err != nil {
