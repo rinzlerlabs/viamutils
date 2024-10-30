@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"strings"
+
+	cfg "go.viam.com/rdk/config"
+	rpcUtils "go.viam.com/utils/rpc"
 )
 
 const (
-	CloudConfigPath           = "/root/.viam/cached_cloud_config_"
+	viamJsonPath              = "/etc/viam.json"
+	cloudConfigPath           = "/root/.viam/cached_cloud_config_"
 	CloudConfigKey            = "cloud"
 	CloudMachineIdKey         = "machine_id"
 	CloudMachinePartIdKey     = "id"
@@ -30,20 +33,39 @@ var (
 	ErrAuthHandlerNotFound            = errors.New("auth handler not found")
 )
 
+type viamJson struct {
+	Cloud viamJsonCloud `json:"cloud"`
+}
+
+type viamJsonCloud struct {
+	AppAddress string `json:"app_address"`
+	ID         string `json:"id"`
+	Secret     string `json:"secret"`
+}
+
+func getEtcViamJson() (*viamJson, error) {
+	file, err := os.ReadFile(viamJsonPath)
+	if err != nil {
+		return nil, err
+	}
+	var viamJson *viamJson
+	if err := json.Unmarshal(file, viamJson); err != nil {
+		return nil, err
+	}
+	return viamJson, nil
+}
+
 func GetMachineId() (string, error) {
 	config, err := GetMachineConfig()
 	if err != nil {
 		return "", err
 	}
-	if config[CloudConfigKey] == nil {
+	if config.Cloud == nil {
 		return "", ErrMissingCloudField
 	}
-	cloudConfig := config[CloudConfigKey].(map[string]interface{})
-	if cloudConfig[CloudMachineIdKey] == nil {
-		return "", ErrMissingFieldMachineId
-	}
+	cloudConfig := config.Cloud
 
-	return cloudConfig[CloudMachineIdKey].(string), nil
+	return cloudConfig.ID, nil
 }
 
 func GetMachinePartId() (string, error) {
@@ -51,18 +73,18 @@ func GetMachinePartId() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if config[CloudConfigKey] == nil {
+	if config.Cloud == nil {
 		return "", ErrMissingCloudField
 	}
-	cloudConfig := config[CloudConfigKey].(map[string]interface{})
-	if cloudConfig[CloudMachinePartIdKey] == nil {
+	cloudConfig := config.Cloud
+	if cloudConfig.ID == "" {
 		return "", ErrMissingFieldMachinePartId
 	}
 
-	return cloudConfig[CloudMachinePartIdKey].(string), nil
+	return cloudConfig.ID, nil
 }
 
-func GetMachineConfig() (map[string]interface{}, error) {
+func GetMachineConfig() (*cfg.Config, error) {
 	filePath, err := GetMachineConfigPath()
 	if err != nil {
 		return nil, err
@@ -71,8 +93,8 @@ func GetMachineConfig() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var config map[string]interface{}
-	if err := json.Unmarshal(file, &config); err != nil {
+	var config *cfg.Config
+	if err := json.Unmarshal(file, config); err != nil {
 		return nil, err
 	}
 	return config, nil
@@ -81,26 +103,15 @@ func GetMachineConfig() (map[string]interface{}, error) {
 func GetMachineConfigPath() (string, error) {
 	filePath := os.Getenv("VIAM_CONFIG_FILE")
 	if _, err := os.Stat(filePath); os.IsNotExist(err) || filePath == "" {
-		filePath = "/root/.viam/"
-		files, err := os.ReadDir(filePath)
+		j, err := getEtcViamJson()
 		if err != nil {
-			// handle the error
 			return "", err
 		}
-		matchingFiles := []os.DirEntry{}
-		for _, file := range files {
-			if file.IsDir() {
-				continue
-			}
-			if name := file.Name(); strings.HasPrefix(name, "cached_cloud_config_") && strings.HasSuffix(name, ".json") {
-				matchingFiles = append(matchingFiles, file)
-			}
+		filePath = cloudConfigPath + j.Cloud.ID + ".json"
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			return "", err
 		}
-
-		if len(matchingFiles) != 1 {
-			return "", os.ErrNotExist
-		}
-		return filePath + matchingFiles[0].Name(), nil
+		return filePath, nil
 	}
 	return filePath, nil
 }
@@ -110,22 +121,16 @@ func GetCredentialsFromConfig() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	if config[AuthKey] == nil {
-		return "", "", ErrMissingCloudField
-	}
-	authConfig := config[AuthKey].(map[string]interface{})
-	if authConfig[AuthHandlersKey] == nil {
+	authConfig := config.Auth
+	if authConfig.Handlers == nil || len(authConfig.Handlers) == 0 {
 		return "", "", ErrMissingFieldAuthHandlers
 	}
-	handlers := authConfig[AuthHandlersKey].([]interface{})
-	if len(handlers) == 0 {
-		return "", "", ErrMissingFieldAuthHandlers
-	}
+	handlers := authConfig.Handlers
 
-	var handler map[string]interface{}
+	var handler *cfg.AuthHandlerConfig
 	for _, h := range handlers {
-		handler = h.(map[string]interface{})
-		if val, ok := handler[AuthHandlersTypeKey].(string); ok && val == "api-key" {
+		if h.Type == rpcUtils.CredentialsTypeAPIKey {
+			handler = &h
 			break
 		}
 	}
@@ -133,8 +138,9 @@ func GetCredentialsFromConfig() (string, string, error) {
 	if handler == nil {
 		return "", "", ErrAuthHandlerNotFound
 	}
-	handlerConfig, ok := handler[AuthHandlersConfigKey].(map[string]interface{})
-	if !ok {
+
+	handlerConfig := handler.Config
+	if handlerConfig == nil {
 		return "", "", ErrMissingFieldAuthHandlersConfig
 	}
 	handlerConfigKeys, ok := handlerConfig[AuthHandlersConfigKeysKey].([]interface{})
