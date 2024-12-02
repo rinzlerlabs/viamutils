@@ -96,7 +96,7 @@ func NewCloudSLAMClientFromApiCredentials(ctx context.Context, logger logging.Lo
 func NewDataClientFromApiCredentials(ctx context.Context, logger logging.Logger, apiKeyName string, apiKey string) (data_proto.DataServiceClient, error) {
 	conn, err := rpc.DialDirectGRPC(
 		ctx,
-		"data.viam.com:443",
+		"app.viam.com:443",
 		logger,
 		rpc.WithEntityCredentials(
 			apiKeyName,
@@ -115,7 +115,7 @@ func NewDataClientFromApiCredentials(ctx context.Context, logger logging.Logger,
 func NewDataSetClientFromApiCredentials(ctx context.Context, logger logging.Logger, apiKeyName string, apiKey string) (dataset_proto.DatasetServiceClient, error) {
 	conn, err := rpc.DialDirectGRPC(
 		ctx,
-		"data.viam.com:443",
+		"app.viam.com:443",
 		logger,
 		rpc.WithEntityCredentials(
 			apiKeyName,
@@ -134,7 +134,7 @@ func NewDataSetClientFromApiCredentials(ctx context.Context, logger logging.Logg
 func NewDataSyncClientFromApiCredentials(ctx context.Context, logger logging.Logger, apiKeyName string, apiKey string) (datasync_proto.DataSyncServiceClient, error) {
 	conn, err := rpc.DialDirectGRPC(
 		ctx,
-		"data.viam.com:443",
+		"app.viam.com:443",
 		logger,
 		rpc.WithEntityCredentials(
 			apiKeyName,
