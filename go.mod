@@ -5,6 +5,8 @@ go 1.23
 toolchain go1.23.2
 
 require (
+	github.com/pkg/errors v0.9.1
+	github.com/stretchr/testify v1.9.0
 	go.viam.com/api v0.1.351
 	go.viam.com/rdk v0.47.2
 	go.viam.com/utils v0.1.108
@@ -20,6 +22,7 @@ require (
 	git.sr.ht/~sbinet/gg v0.3.1 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
+	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/bluenviron/gortsplib/v4 v4.8.0 // indirect
 	github.com/bufbuild/protocompile v0.5.1 // indirect
@@ -80,6 +83,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/miekg/dns v1.1.53 // indirect
 	github.com/montanaflynn/stats v0.7.0 // indirect
 	github.com/pion/datachannel v1.5.8 // indirect
@@ -97,7 +101,6 @@ require (
 	github.com/pion/stun v0.6.1 // indirect
 	github.com/pion/transport/v2 v2.2.10 // indirect
 	github.com/pion/turn/v2 v2.1.6 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
@@ -105,7 +108,6 @@ require (
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/smartystreets/assertions v1.13.0 // indirect
 	github.com/srikrsna/protoc-gen-gotag v0.6.2 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/viamrobotics/webrtc/v3 v3.99.10 // indirect
 	github.com/wlynxg/anet v0.0.3 // indirect

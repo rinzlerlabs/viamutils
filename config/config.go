@@ -31,6 +31,18 @@ var (
 	ErrMissingFieldAuthHandlersConfig = errors.New("missing field config")
 	ErrEmptyFieldAuthHandlers         = errors.New("empty field auth handlers")
 	ErrAuthHandlerNotFound            = errors.New("auth handler not found")
+	etcViamJsonPath                   = func() string { return viamJsonPath }
+	viamConfigFilePath                = func() (string, error) {
+		j, err := getEtcViamJson()
+		if err != nil {
+			return "", err
+		}
+		filePath := cloudConfigPath + j.Cloud.ID + ".json"
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			return "", err
+		}
+		return filePath, nil
+	}
 )
 
 type viamJson struct {
@@ -44,12 +56,12 @@ type viamJsonCloud struct {
 }
 
 func getEtcViamJson() (*viamJson, error) {
-	file, err := os.ReadFile(viamJsonPath)
+	file, err := os.ReadFile(etcViamJsonPath())
 	if err != nil {
 		return nil, err
 	}
 	var viamJson *viamJson
-	if err := json.Unmarshal(file, viamJson); err != nil {
+	if err := json.Unmarshal(file, &viamJson); err != nil {
 		return nil, err
 	}
 	return viamJson, nil
@@ -102,26 +114,14 @@ func GetMachineConfig() (*cfg.Config, error) {
 		return nil, err
 	}
 	var config *cfg.Config
-	if err := json.Unmarshal(file, config); err != nil {
+	if err := json.Unmarshal(file, &config); err != nil {
 		return nil, err
 	}
 	return config, nil
 }
 
 func GetMachineConfigPath() (string, error) {
-	filePath := os.Getenv("VIAM_CONFIG_FILE")
-	if _, err := os.Stat(filePath); os.IsNotExist(err) || filePath == "" {
-		j, err := getEtcViamJson()
-		if err != nil {
-			return "", err
-		}
-		filePath = cloudConfigPath + j.Cloud.ID + ".json"
-		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			return "", err
-		}
-		return filePath, nil
-	}
-	return filePath, nil
+	return viamConfigFilePath()
 }
 
 func GetCredentialsFromConfig() (string, string, error) {
@@ -130,7 +130,7 @@ func GetCredentialsFromConfig() (string, string, error) {
 		return "", "", err
 	}
 	authConfig := config.Auth
-	if authConfig.Handlers == nil || len(authConfig.Handlers) == 0 {
+	if len(authConfig.Handlers) == 0 {
 		return "", "", ErrMissingFieldAuthHandlers
 	}
 	handlers := authConfig.Handlers

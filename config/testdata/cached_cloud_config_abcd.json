@@ -1,0 +1,59 @@
+{
+    "cloud": {
+      "id": "abcd",
+      "location_secret": "efgh",
+      "location_secrets": [
+        {
+          "id": "abcd",
+          "secret": "efgh"
+        }
+      ],
+      "location_id": "abcd",
+      "primary_org_id": "abcd",
+      "machine_id": "abcd",
+      "managed_by": "viam.cloud",
+      "fqdn": "test.foo.viam.cloud",
+      "local_fqdn": "test.foo.local.viam.cloud",
+      "signaling_address": "app.viam.com:443",
+      "refresh_interval": "10s",
+      "tls_certificate": "",
+      "tls_private_key": ""
+    },
+    "modules": [],
+    "components": [],
+    "packages": [],
+    "network": {
+      "sessions": {
+        "heartbeat_window": "2s"
+      }
+    },
+    "auth": {
+      "handlers": [
+        {
+          "type": "api-key",
+          "config": {
+            "abcd": "efgh",
+            "keys": [
+              "abcd"
+            ]
+          }
+        }
+      ],
+      "external_auth_config": {
+        "jwks": {
+          "keys": [
+            {
+              "alg": "RS256",
+              "e": "AQAB",
+              "kid": "efgh",
+              "kty": "RSA",
+              "n": "abcd"
+            }
+          ]
+        }
+      }
+    },
+    "disable_partial_start": false,
+    "enable_web_profile": false,
+    "revision": "1733167330843"
+  }

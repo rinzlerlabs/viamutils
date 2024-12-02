@@ -13,10 +13,25 @@ type Component struct {
 	Model resource.Model
 }
 
-var components = make([]Component, 0)
+type StartupConfig struct {
+	Components []Component
+	FailOnAdd  bool
+}
+
+var config = StartupConfig{
+	Components: make([]Component, 0),
+	FailOnAdd:  true,
+}
+
+func SetConfig(c StartupConfig) {
+	if c.Components == nil {
+		c.Components = make([]Component, 0)
+	}
+	config = c
+}
 
 func AddModularResource(api resource.API, model resource.Model) error {
-	components = append(components, Component{
+	config.Components = append(config.Components, Component{
 		API:   api,
 		Model: model,
 	})
@@ -30,13 +45,15 @@ func RunModule(ctx context.Context, args []string, logger logging.Logger) error 
 		logger.Errorf("Failed to start module: %v", err)
 		return err
 	}
-	logger.Infof("Module started successfully, registering %v models", len(components))
-	for _, component := range components {
+	logger.Infof("Module started successfully, registering %v models", len(config.Components))
+	for _, component := range config.Components {
 		logger.Infof("Adding %v to module with API %v", component.Model, component.API)
 		err = module.AddModelFromRegistry(ctx, component.API, component.Model)
 		if err != nil {
-			logger.Errorf("Failed to add model to module: %v", err)
-			return err
+			logger.Errorf("Failed to add model (%v) to module: %v", component.Model, err)
+			if config.FailOnAdd {
+				return err
+			}
 		}
 	}
 	logger.Info("Starting module")
