@@ -1,4 +1,4 @@
-module github.com/thegreatco/viamutils
+module github.com/rinzlerlabs/viamutils
 
 go 1.23
 
