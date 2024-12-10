@@ -55,19 +55,19 @@ type viamJsonCloud struct {
 	Secret     string `json:"secret"`
 }
 
-func getEtcViamJson() (*viamJson, error) {
+func getEtcViamJson() (viamJson *viamJson, err error) {
 	file, err := os.ReadFile(etcViamJsonPath())
 	if err != nil {
 		return nil, err
 	}
-	var viamJson *viamJson
+	viamJson = nil
 	if err := json.Unmarshal(file, &viamJson); err != nil {
 		return nil, err
 	}
 	return viamJson, nil
 }
 
-func GetMachineFqdn() (string, error) {
+func GetMachineFqdn() (fqdn string, err error) {
 	config, err := GetMachineConfig()
 	if err != nil {
 		return "", err
@@ -75,7 +75,7 @@ func GetMachineFqdn() (string, error) {
 	return config.Cloud.FQDN, nil
 }
 
-func GetMachineId() (string, error) {
+func GetMachineId() (machineId string, err error) {
 	config, err := GetMachineConfig()
 	if err != nil {
 		return "", err
@@ -88,7 +88,7 @@ func GetMachineId() (string, error) {
 	return cloudConfig.ID, nil
 }
 
-func GetMachinePartId() (string, error) {
+func GetMachinePartId() (partId string, err error) {
 	config, err := GetMachineConfig()
 	if err != nil {
 		return "", err
@@ -104,7 +104,7 @@ func GetMachinePartId() (string, error) {
 	return cloudConfig.ID, nil
 }
 
-func GetMachineConfig() (*cfg.Config, error) {
+func GetMachineConfig() (config *cfg.Config, err error) {
 	filePath, err := GetMachineConfigPath()
 	if err != nil {
 		return nil, err
@@ -113,18 +113,18 @@ func GetMachineConfig() (*cfg.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	var config *cfg.Config
+	config = nil
 	if err := json.Unmarshal(file, &config); err != nil {
 		return nil, err
 	}
 	return config, nil
 }
 
-func GetMachineConfigPath() (string, error) {
+func GetMachineConfigPath() (path string, err error) {
 	return viamConfigFilePath()
 }
 
-func GetCredentialsFromConfig() (string, string, error) {
+func GetCredentialsFromConfig() (apiKeyID string, apiKey string, err error) {
 	config, err := GetMachineConfig()
 	if err != nil {
 		return "", "", err
