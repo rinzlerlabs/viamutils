@@ -40,7 +40,7 @@ func AddModularResource(api resource.API, model resource.Model) error {
 
 func RunModule(ctx context.Context, args []string, logger logging.Logger) error {
 	logger.Infof("Starting Viam Module with args: %v", args)
-	module, err := module.NewModuleFromArgs(ctx, logger)
+	module, err := module.NewModuleFromArgs(ctx)
 	if err != nil {
 		logger.Errorf("Failed to start module: %v", err)
 		return err
